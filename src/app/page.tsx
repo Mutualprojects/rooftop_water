@@ -367,8 +367,8 @@ export default function Dashboard() {
       .then(r => r.json())
       .then((json: any[]) => {
         const valid = json.filter(row => {
-          const n = parseInt(row["S. No."]);
-          return !isNaN(n) && n > 0;
+          const sNo = (row["S. No."] || "").toString().trim();
+          return /^\d+$/.test(sNo) && parseInt(sNo) > 0;
         });
         setRawData(valid);
         setLoading(false);

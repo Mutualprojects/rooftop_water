@@ -240,7 +240,7 @@ function ListView({ rows, page, pageSize, onPageChange }: {
               <div className="flex-shrink-0 flex flex-col items-end gap-2 text-right">
                 {row["No OF Systems "] && (
                   <span className="text-xs bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded-full">
-                    {row["No OF Systems "]} systems
+                    {row["No OF Systems "]}
                   </span>
                 )}
                 <MaterialsTag row={row} />
@@ -302,7 +302,7 @@ function KanbanView({ rows }: { rows: SheetRow[] }) {
                     </p>
                     {row["No OF Systems "] && (
                       <p className="text-[11px] text-slate-500 mb-1.5 flex items-center gap-1">
-                        <SunMedium className="w-3 h-3 text-amber-400" />{row["No OF Systems "]} systems
+                        <SunMedium className="w-3 h-3 text-amber-400" />{row["No OF Systems "]}
                       </p>
                     )}
                     <div className="border-t border-slate-100 pt-1.5 mt-1.5">
@@ -384,15 +384,20 @@ export default function Dashboard() {
   const stats = useMemo(() => {
     if (!rawData.length) return null;
     let installed = 0, installation_pending = 0, material_pending = 0, unknown = 0;
+    let totalSystems = 0;
     const districtCounts: Record<string, number> = {};
     rawData.forEach(row => {
+      const sysCount = row["No OF Systems "]?.includes("2 Nos") ? 2 : 1;
+      totalSystems += sysCount;
+
       const sk = getStatusKey(row.Status);
-      if (sk === "installed") installed++;
-      else if (sk === "installation_pending") installation_pending++;
-      else if (sk === "material_pending") material_pending++;
-      else unknown++;
+      if (sk === "installed") installed += sysCount;
+      else if (sk === "installation_pending") installation_pending += sysCount;
+      else if (sk === "material_pending") material_pending += sysCount;
+      else unknown += sysCount;
+
       const d = (row.District || "Unknown").trim().toUpperCase();
-      districtCounts[d] = (districtCounts[d] || 0) + 1;
+      districtCounts[d] = (districtCounts[d] || 0) + sysCount;
     });
     const districtData = Object.entries(districtCounts)
       .map(([name, count]) => ({ name, count }))
@@ -403,8 +408,8 @@ export default function Dashboard() {
       { name: "Material Pending", value: material_pending, color: "#ef4444" },
       ...(unknown > 0 ? [{ name: "Unknown", value: unknown, color: "#94a3b8" }] : []),
     ].filter(s => s.value > 0);
-    const completionRate = rawData.length > 0 ? ((installed / rawData.length) * 100).toFixed(1) : "0";
-    return { totalSites: rawData.length, installed, installation_pending, material_pending, districtData, statusData, completionRate };
+    const completionRate = totalSystems > 0 ? ((installed / totalSystems) * 100).toFixed(1) : "0";
+    return { totalSites: rawData.length, totalSystems, installed, installation_pending, material_pending, districtData, statusData, completionRate };
   }, [rawData]);
 
   // Filtered + searched data
@@ -509,10 +514,10 @@ export default function Dashboard() {
         {/* ── KPI Cards ──────────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard
-            title="Total Sites"
-            value={stats.totalSites}
-            icon={<Building2 className="w-5 h-5 text-blue-600" />}
-            sub={`${districts.length - 1} districts covered`}
+            title="Total Systems"
+            value={stats.totalSystems}
+            icon={<SunMedium className="w-5 h-5 text-blue-600" />}
+            sub={`Across ${stats.totalSites} physical sites`}
             color="bg-blue-50 border-blue-100"
           />
           <KpiCard

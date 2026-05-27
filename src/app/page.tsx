@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { SystemFlowDiagram } from "@/components/SystemFlowDiagram";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface SheetRow {
   "S. No.": string;
   District: string;
@@ -23,11 +22,13 @@ interface SheetRow {
   "NAME OF THE PRINCIPAL": string;
   "CONTACT NUMBER": string;
   "No OF Systems ": string;
+  "Phase -1 -200 Nos ": string;
   Tanks: string;
   "Collectors ": string;
   "MMS ": string;
   "Plumbing ": string;
   "System Installation Status": string;
+  "Commissioning Date ": string;
   Status: string;
   "Remarks ": string;
 }
@@ -233,6 +234,9 @@ function ListView({ rows, page, pageSize, onPageChange }: {
                   {row.ADDRESS && <span className="truncate max-w-[260px]">{row.ADDRESS}</span>}
                   {row["PIN CODE"] && <span>PIN: {row["PIN CODE"]}</span>}
                 </div>
+                {row["Commissioning Date "] && (
+                  <p className="mt-1 text-xs text-emerald-600 font-medium">Commissioned: {row["Commissioning Date "]}</p>
+                )}
                 {row["Remarks "] && (
                   <p className="mt-1.5 text-xs text-slate-400 italic truncate max-w-lg">"{row["Remarks "]}"</p>
                 )}
@@ -387,7 +391,12 @@ export default function Dashboard() {
     let totalSystems = 0;
     const districtCounts: Record<string, number> = {};
     rawData.forEach(row => {
-      const sysCount = row["No OF Systems "]?.includes("2 Nos") ? 2 : 1;
+      // First try to parse the Phase column, if invalid, fallback to checking the "No OF Systems" string for "2"
+      let sysCount = parseInt(row["Phase -1 -200 Nos "]);
+      if (isNaN(sysCount) || sysCount < 1) {
+        sysCount = row["No OF Systems "]?.includes("2 Nos") ? 2 : 1;
+      }
+      
       totalSystems += sysCount;
 
       const sk = getStatusKey(row.Status);

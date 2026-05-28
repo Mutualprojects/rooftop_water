@@ -28,16 +28,18 @@ interface SheetRow {
   "MMS ": string;
   "Plumbing ": string;
   "System Installation Status": string;
-  "Commissioning Date ": string;
+  "Commissioning Status": string;
   Status: string;
   "Remarks ": string;
+  "Installation Report URL": string;
+  "Installatiion Pics URl": string;
 }
 
 type ViewMode = "table" | "list" | "kanban";
 type StatusFilter = "all" | "installed" | "installation_pending" | "material_pending" | "unknown";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const API_URL = "https://sheetdb.io/api/v1/wcaiby6gtjaer";
+const API_URL = "https://sheetdb.io/api/v1/67vmb2l27no38";
 const PAGE_SIZE = 10;
 const CHART_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316"];
 
@@ -234,8 +236,8 @@ function ListView({ rows, page, pageSize, onPageChange }: {
                   {row.ADDRESS && <span className="truncate max-w-[260px]">{row.ADDRESS}</span>}
                   {row["PIN CODE"] && <span>PIN: {row["PIN CODE"]}</span>}
                 </div>
-                {row["Commissioning Date "] && (
-                  <p className="mt-1 text-xs text-emerald-600 font-medium">Commissioned: {row["Commissioning Date "]}</p>
+                {row["Commissioning Status"] && row["Commissioning Status"].toLowerCase() !== "not commisioned" && (
+                  <p className="mt-1 text-xs text-emerald-600 font-medium">Commissioning Status: {row["Commissioning Status"]}</p>
                 )}
                 {row["Remarks "] && (
                   <p className="mt-1.5 text-xs text-slate-400 italic truncate max-w-lg">"{row["Remarks "]}"</p>
@@ -396,7 +398,7 @@ export default function Dashboard() {
       if (isNaN(sysCount) || sysCount < 1) {
         sysCount = row["No OF Systems "]?.includes("2 Nos") ? 2 : 1;
       }
-      
+
       totalSystems += sysCount;
 
       const sk = getStatusKey(row.Status);
